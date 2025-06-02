@@ -1,0 +1,32 @@
+[build-system]
+requires = ["maturin>=0.14,<0.15"]
+build-backend = "maturin"
+
+[project]
+name = "mystique"
+version = "0.0.2"
+authors = [{name = "Lucas Mattick", email = "lucas.mattick@system1.com"}]
+description = "Creates synthetic controls for testing and experimentation."
+readme = "README.rst"
+# license = { file = "LICENSE" }
+requires-python = ">=3.8"
+keywords = ["synthetic control", "experiment"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Rust",
+    "Natural Language :: English",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "colorful",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "scipy",
+]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "mystique.rust"
+python-source = "src"

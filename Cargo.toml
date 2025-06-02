@@ -1,0 +1,19 @@
+[package]
+name = "rust"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+# "cdylib" is necessary to produce a shared library for Python to import from.
+# Downstream Rust code (including code in `bin/`, `examples/`, and `tests/`)
+# need the "rlib" or "lib" crate type also included:
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+ndarray-npy = { version = "0.8.1", default-features = false }
+numpy = "0.18.0"
+ndarray = { version = "0.15.6", features = ["approx", "rayon"] }
+pyo3 = { version = "0.18.2", features = ["extension-module"] }
+
+[dev-dependencies]
+temp_testdir = "0.2.3"
