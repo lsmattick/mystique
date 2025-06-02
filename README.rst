@@ -18,11 +18,11 @@ Kirby |kirby|
 
 Given many possible control units, Kirby selects the closest control units by measuring distance
 between the test unit and control unit time series data for the pre intervention period. The
-distnace metric used is either the dynamic time warping distance metric, or the euclidean distance
-metric. In time series analysis. Dynamic time warping (DTW) is an algorithm for measuring similarity
+distance metric used is either the dynamic time warping distance metric, or the euclidean distance
+metric. In time series analysis, dynamic time warping (DTW) is an algorithm for measuring similarity
 between two temporal sequences, which may vary in speed. Control units with the smallest distance to
 the test unit are selected. By default the top 19 control units are selected for each test unit,
-however, this can be specifed as an instance attribute. The same control unit can be selected for
+however, this can be specified as an instance attribute. The same control unit can be selected for
 multiple test units.
 
 .. image:: images/dtw.svg
@@ -32,7 +32,7 @@ SyntheticControl
 ----------------
 
 This algo generates counter factual data for an experiment given the time series data for the test
-units and the control units. First we explain the mathematical interpretation, then, what
+units and the control units. First, we explain the mathematical interpretation, then, what
 attributes are required to use the class along with an example.
 
 Formal Math Description
@@ -87,7 +87,7 @@ Where $X$ is a $J \\times m$ matrix of features with $J$ control units and $m$ f
 $X_0$ from earlier. $Y$ is time series data for the control units from either the pre or post
 intervention period depending on the model type. If the model type is prospective, then the pre
 intervention data for the test unit is split into a training and validation set from which we take
-$X$ and $Y$ respeectively. If the model type is retrospective, then $X$ and $Y$ are constructed from
+$X$ and $Y$ respectively. If the model type is retrospective, then $X$ and $Y$ are constructed from
 pre and post intervention data respectively.
 
 Required & Optional Arguments
@@ -129,7 +129,7 @@ With optional arguments:
 |                            |               | set to the max date. Must be of the form 'YYYY-MM-DD'. |                                             |
 +----------------------------+---------------+--------------------------------------------------------+---------------------------------------------+
 | ``covariates``             | ``list[str]`` | List of column names in 'data'                         | ``['revenue', 'rpc', 'margin_pct']``        |
-|                            |               | that should be added as additoinal features for        |                                             |
+|                            |               | that should be added as additional features for        |                                             |
 |                            |               | the synthetic control algo.                            |                                             |
 +----------------------------+---------------+--------------------------------------------------------+---------------------------------------------+
 | ``model_type``             | ``str``       | Either 'prospective' or 'retrospective'.               | ``'retrospective'``                         |
@@ -139,7 +139,7 @@ With optional arguments:
 |                            |               | Defaults to 'induced'.                                 |                                             |
 +----------------------------+---------------+--------------------------------------------------------+---------------------------------------------+
 | ``lam``                    | ``float``     | Short for lambda. Defaults to None.                    | ``0.0261``                                  |
-|                            |               | It is reccomneded that this is left as None so         |                                             |
+|                            |               | It is recommended that this is left as None so         |                                             |
 |                            |               | that an optimal lambda can be trained. If a            |                                             |
 |                            |               | value for lam is provided, no training will be         |                                             |
 |                            |               | performed on lambda.                                   |                                             |
@@ -147,8 +147,8 @@ With optional arguments:
 | ``training_periods``       | ``int``       | The number of training periods to                      | ``14``                                      |
 |                            |               | use for the prospective model.                         |                                             |
 +----------------------------+---------------+--------------------------------------------------------+---------------------------------------------+
-| ``aggregate_function_map`` | ``dict``      | A mapping for values that reuire a formula             | .. code:: python                            |
-|                            |               | upong aggreation over a specific window.               |                                             |
+| ``aggregate_function_map`` | ``dict``      | A mapping for values that require a formula             | .. code:: python                            |
+|                            |               | upon aggregation over a specific window.               |                                             |
 |                            |               |                                                        |     {                                       |
 |                            |               |                                                        |         'rpc': lambda row:                  |
 |                            |               |                                                        |             row['revenue'] / row['clicks'], |
