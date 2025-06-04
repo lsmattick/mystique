@@ -120,7 +120,6 @@ A new instance of the SyntheticConrol object requires at minimum the following a
 
 With optional arguments:
 
-
 +----------------------------+---------------+--------------------------------------------------------+---------------------------------------------+
 | param                      | type          | description                                            | example                                     |
 +============================+===============+========================================================+=============================================+
@@ -148,7 +147,7 @@ With optional arguments:
 | ``training_periods``       | ``int``       | The number of training periods to                      | ``14``                                      |
 |                            |               | use for the prospective model.                         |                                             |
 +----------------------------+---------------+--------------------------------------------------------+---------------------------------------------+
-| ``aggregate_function_map`` | ``dict``      | A mapping for values that require a formula             | .. code:: python                            |
+| ``aggregate_function_map`` | ``dict``      | A mapping for values that require a formula             | .. code:: python                           |
 |                            |               | upon aggregation over a specific window.               |                                             |
 |                            |               |                                                        |     {                                       |
 |                            |               |                                                        |         'rpc': lambda row:                  |
@@ -158,7 +157,6 @@ With optional arguments:
 |                            |               |                                                        |             / row['revenue']                |
 |                            |               |                                                        |     }                                       |
 +----------------------------+---------------+--------------------------------------------------------+---------------------------------------------+
-
 
 Treatment Effects
 -----------------
