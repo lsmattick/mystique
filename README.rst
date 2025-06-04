@@ -147,7 +147,7 @@ With optional arguments:
 | ``training_periods``       | ``int``       | The number of training periods to                      | ``14``                                      |
 |                            |               | use for the prospective model.                         |                                             |
 +----------------------------+---------------+--------------------------------------------------------+---------------------------------------------+
-| ``aggregate_function_map`` | ``dict``      | A mapping for values that require a formula             | .. code:: python                           |
+| ``aggregate_function_map`` | ``dict``      | A mapping for values that require a formula            | .. code:: python                            |
 |                            |               | upon aggregation over a specific window.               |                                             |
 |                            |               |                                                        |     {                                       |
 |                            |               |                                                        |         'rpc': lambda row:                  |
