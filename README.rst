@@ -81,7 +81,7 @@ separate problem using sklearn's MultiTaskLasso multiple regression model. The f
 minimize the expression
 
 $$\\frac{1}{2J} ||Y - XV||^2_{Fro} + \\alpha ||V||_{21}$$
-$$||V||_21 = \sum_i \sqrt{\sum_j v_{ij}^2}$$
+$$||V||_{21} = \\sum_i \\sqrt{\\sum_j v_{ij}^2}$$
 
 Where $X$ is a $J \\times m$ matrix of features with $J$ control units and $m$ features, the same as
 $X_0$ from earlier. $Y$ is time series data for the control units from either the pre or post
@@ -163,7 +163,7 @@ Treatment Effects
 
 The estimated treatment effects due to the intervention are calculated as the difference between the
 test unit outcomes and its corresponding synthetic control over the post intervention period. In the
-plot below, this is the difference between the active2 plot and the synthetic_active2 plot after the
+plot below, this is the difference between the test_unit_1 plot and the synthetic_test_unit_1 plot after the
 vertical dotted line marking the event date.
 
 .. image:: images/estimate_effects.png
@@ -205,10 +205,10 @@ and control units.
 .. image:: images/rmspe_ratios.png
    :width: 650
 
-We can see the RMSPE ratio for one of the test units (active2) is substantially larger than the
+We can see the RMSPE ratio for one of the test units (test_unit_1) is substantially larger than the
 control units and the other test unit. The probability of an RMSPE ratio this large is 1 / 20 or
 0.05. That is, if one were to assign the intervention at random in the data, the probability of
-obtaining an RMSPE ratio as large as the test unit active2 is 0.05, giving us a p-value of 0.05. The
+obtaining an RMSPE ratio as large as the test unit test_unit_1 is 0.05, giving us a p-value of 0.05. The
 only unclear part in this process is describing this ratio as "substantially" larger than the
 control units. We formally describe a test unit RMSPE ratio as substantially larger than the control
 unit RMSPE ratios if the following two conditions are true.
