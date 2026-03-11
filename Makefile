@@ -1,65 +1,123 @@
-AWS_ACCOUNT_ID ?= 364189071156
-DOMAIN ?= s1-packages
-REPO ?= python
-FORMAT ?= pypi
-AWS_DEFAULT_REGION ?= us-west-2
-PACKAGE_NAME ?= s1_mystique
-PKG_DIR ?= $(CARGO_TARGET_DIR)/wheels/$(PACKAGE_NAME)*
-KEEP_OLD ?= 1
-VERSION_BASE := $(shell grep version pyproject.toml | awk -F '=' '{print $$2}' | sed "s/\"//g")
-VERSION_SUFFIX ?= $(shell find Makefile src/mystique pyproject.toml -type f | grep -v _version | sort | xargs md5sum | md5sum | awk '{print $$1}')
-VERSION := $(VERSION_BASE)+$(VERSION_SUFFIX)
-# export these variables, so we can use them from tests
-export AWS_ACCOUNT_ID DOMAIN REPO AWS_DEFAULT_REGION VERSION PACKAGE_NAME
+# Mystique Makefile - Standalone development and build system
+# Python/Rust hybrid package using maturin
 
-all: lint test
-s1_py_pkg: clean dist upload
+# Variables
+PYTHON := python3
+PIP := pip3
+MATURIN := maturin
+PYTEST := pytest
+FLAKE8 := flake8
+PACKAGE_NAME := mystique
+SRC_DIR := src/mystique
+TESTS_DIR := tests
 
-test:
-	@python -m pytest -v --cov=mystique --cov-config=.coveragerc --cov-report term-missing --cov-fail-under=0 --cov-report html .
+# Build configuration
+CARGO_TARGET_DIR ?= target
 
-lint:
-	@flake8
+# Default target
+.DEFAULT_GOAL := help
 
-install:
-	@maturin build --release --sdist
-	@pip install . -v
+# PHONY targets
+.PHONY: help install install-deps dev test lint check coverage \
+        build build-dev sdist clean clean-rust distclean \
+        check-rust check-maturin version
 
-update_version: ## update version string based on content hash
-	@sed -i "s/^version = \".*\"/version = \"$(VERSION)\"/" pyproject.toml
+help: ## Show this help message
+	@echo 'Usage: make [target]'
+	@echo ''
+	@echo 'Available targets:'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-dist: update_version
-	# replace the package name to avoid collision with pypi-published mystique package
-	@sed -i "s/^name = \".*\"/name = \"$(PACKAGE_NAME)\"/" pyproject.toml
-	# add cargo during build time, as the image doesn't have it
-	@curl -sSLf https://sh.rustup.rs | bash -s -- -y
-	@maturin build --release --sdist --zig
+# Utility checks
+check-rust: ## Check if Rust toolchain is installed
+	@which rustc > /dev/null 2>&1 || \
+		(echo "Error: Rust toolchain not found. Install from https://rustup.rs/" && exit 1)
+	@echo "Rust toolchain: $$(rustc --version)"
 
-codeartifact_login:
-	@/OpenMail/packages/python/login.sh
+check-maturin: ## Check if maturin is installed
+	@which $(MATURIN) > /dev/null 2>&1 || \
+		(echo "Error: maturin not found. Install with: pip install maturin" && exit 1)
+	@echo "Maturin: $$($(MATURIN) --version)"
 
-codeartifact_twine_login: ## Log into Code Artifact and set up for twine. Supply AWS_PROFILE=<profile> to use local credentials.
-	@aws --region $(AWS_DEFAULT_REGION) codeartifact login --tool twine --domain $(DOMAIN) --domain-owner $(AWS_ACCOUNT_ID) --repository $(REPO)
+version: ## Display current package version
+	@grep '^version = ' pyproject.toml | awk -F'"' '{print $$2}'
 
-upload: codeartifact_twine_login codeartifact_login ## Upload package to AWS Code Artifact the current hash is not yet present
-	if ! $$(aws codeartifact list-package-versions --domain $(DOMAIN) --repository $(REPO) --format $(FORMAT) --package $(PACKAGE_NAME) --query 'versions[].version' --output text | grep -q $(VERSION)); then \
-		twine upload --repository codeartifact $(PKG_DIR) --verbose; \
-	fi
+# Installation targets
+install-deps: ## Install Python dependencies only
+	@echo "Installing Python dependencies..."
+	$(PIP) install colorful numpy pandas scikit-learn scipy
+	$(PIP) install pytest pytest-cov flake8
+	@echo "Dependencies installed"
 
-delete_old: codeartifact_login
-	@aws codeartifact list-package-versions --domain $(DOMAIN) --repository $(REPO) --format $(FORMAT) --package $(PACKAGE_NAME) --sort-by PUBLISHED_TIME --query "versions[$(KEEP_OLD):].version" --output text | \
-		xargs aws codeartifact delete-package-versions --domain $(DOMAIN) --repository $(REPO) --format $(FORMAT) --package $(PACKAGE_NAME) --versions
+install: check-rust check-maturin install-deps ## Install package for development (editable)
+	@echo "Installing $(PACKAGE_NAME) in development mode..."
+	$(MATURIN) develop
+	@echo "Installation complete"
 
-clean:
+dev: install ## Alias for install
+
+# Testing and quality
+test: ## Run tests with coverage
+	@echo "Running tests with coverage..."
+	$(PYTEST) -v \
+		--cov=mystique \
+		--cov-report=term-missing \
+		--cov-report=html \
+		--cov-fail-under=0 \
+		$(TESTS_DIR)/
+	@echo "Coverage report: htmlcov/index.html"
+
+lint: ## Run flake8 linter
+	@echo "Running flake8..."
+	$(FLAKE8) $(SRC_DIR) $(TESTS_DIR)/ --max-line-length=100
+
+check: lint test ## Run both lint and test
+
+coverage: test ## Generate HTML coverage report (alias for test)
+	@echo "Opening coverage report..."
+	@open htmlcov/index.html 2>/dev/null || xdg-open htmlcov/index.html 2>/dev/null || echo "Coverage report: htmlcov/index.html"
+
+# Build targets
+build: check-rust check-maturin ## Build release wheel
+	@echo "Building release wheel..."
+	$(MATURIN) build --release
+	@ls -lh $(CARGO_TARGET_DIR)/wheels/ 2>/dev/null || echo "Wheels built in $(CARGO_TARGET_DIR)/wheels/"
+
+build-dev: check-rust check-maturin ## Build debug wheel
+	@echo "Building debug wheel..."
+	$(MATURIN) build
+	@echo "Debug build complete: $(CARGO_TARGET_DIR)/wheels/"
+
+sdist: check-rust check-maturin ## Build source distribution
+	@echo "Building source distribution..."
+	$(MATURIN) build --release --sdist
+	@echo "Source distribution: $(CARGO_TARGET_DIR)/wheels/"
+
+# Cleanup targets
+clean: ## Remove build artifacts and cache files
+	@echo "Cleaning build artifacts..."
 	@find . -type f -name '*.pyc' -delete
-	@find . -type d -name '__pycache__' | xargs rm -rf
+	@find . -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
 	@rm -rf build/
 	@rm -rf dist/
+	@rm -rf $(CARGO_TARGET_DIR)/wheels/
 	@rm -f MANIFEST
 	@rm -rf docs/build/
 	@rm -f .coverage
-	@rm -rf *.egg*
+	@rm -rf *.egg-info
 	@rm -rf htmlcov
-	@rm -f $(PKG_DIR)
+	@rm -rf .pytest_cache
+	@echo "Clean complete"
 
-.PHONY: test lint install clean
+clean-rust: ## Clean Rust build artifacts
+	@echo "Cleaning Rust artifacts..."
+	@cargo clean 2>/dev/null || echo "cargo not found, skipping Rust clean"
+	@rm -rf $(CARGO_TARGET_DIR)
+	@echo "Rust artifacts cleaned"
+
+distclean: clean clean-rust ## Complete cleanup including virtual environments
+	@echo "Complete cleanup..."
+	@rm -rf venv/
+	@rm -rf .venv/
+	@echo "Distribution clean complete"
