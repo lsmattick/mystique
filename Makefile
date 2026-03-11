@@ -46,11 +46,12 @@ version: ## Display current package version
 # Installation targets
 install-deps: ## Install Python dependencies only
 	@echo "Installing Python dependencies..."
+	$(PIP) install maturin
 	$(PIP) install colorful numpy pandas scikit-learn scipy
 	$(PIP) install pytest pytest-cov flake8
 	@echo "Dependencies installed"
 
-install: check-rust check-maturin install-deps ## Install package for development (editable)
+install: check-rust install-deps ## Install package for development (editable)
 	@echo "Installing $(PACKAGE_NAME) in development mode..."
 	$(MATURIN) develop
 	@echo "Installation complete"
