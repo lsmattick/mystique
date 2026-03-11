@@ -230,7 +230,7 @@ Below is an example on how to use the Kirby and SyntheticControl algos.
 .. code:: python
 
     import pandas as pd
-    from s1_mystique import Kirby, SyntheticControl
+    from mystique import Kirby, SyntheticControl
 
     df_campaigns = pd.read_csv("domestic_taboola_campaigns.csv")
 
@@ -274,42 +274,110 @@ Below is an example on how to use the Kirby and SyntheticControl algos.
     # Run the placebo test to determine significance of the estimated treatment effects.
     sc.run_placebo_test()
 
-Tests
------
+Installation
+------------
 
-Note: these Make targets can be invoked with `USE_TOX_IMAGE=true` should you decide
-not to setup tox.
+Requirements
+^^^^^^^^^^^^
 
-Lint code with
+Mystique is a Python/Rust hybrid package and requires:
 
-::
+- **Python 3.8+** (tested with Python 3.12)
+- **Rust toolchain** (for building the Rust extensions)
 
-    $ make lint
+Step 1: Install Rust
+^^^^^^^^^^^^^^^^^^^^
 
-Check cyclomatic code complexity with
-
-::
-
-    $ make complexity
-
-Run tests with
+If you don't have Rust installed, install it from https://rustup.rs/
 
 ::
 
-    $ make test
+    $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    $ source $HOME/.cargo/env
 
-Install
--------
+Verify Rust installation:
 
-Install without running linter, cyclomatic complexity and unit tests:
+::
+
+    $ rustc --version
+
+Step 2: Create Virtual Environment (Recommended)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+    $ cd /path/to/mystique
+    $ python3 -m venv venv
+    $ source venv/bin/activate
+
+Step 3: Install Mystique
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
     $ make install
 
+This will:
 
-Run linter and unit tests:
+- Install maturin (build tool for Python/Rust packages)
+- Install all Python dependencies (numpy, pandas, scipy, scikit-learn, etc.)
+- Build the Rust extension
+- Install mystique in development/editable mode
+
+Available Make Targets
+^^^^^^^^^^^^^^^^^^^^^^
+
+View all available commands:
 
 ::
 
-    $ make
+    $ make help
+
+Common targets:
+
+::
+
+    $ make install       # Full installation (requires Rust)
+    $ make install-deps  # Install Python dependencies only
+    $ make test          # Run tests with coverage
+    $ make lint          # Run flake8 linter
+    $ make check         # Run both lint and test
+    $ make build         # Build release wheel
+    $ make clean         # Remove build artifacts
+    $ make version       # Display package version
+
+Development Workflow
+^^^^^^^^^^^^^^^^^^^^
+
+::
+
+    # Activate virtual environment
+    $ source venv/bin/activate
+
+    # Run tests
+    $ make test
+
+    # Run linter
+    $ make lint
+
+    # Build package
+    $ make build
+
+Testing
+-------
+
+Run tests with coverage:
+
+::
+
+    $ make test
+
+This runs pytest with coverage reporting. HTML coverage report is generated in ``htmlcov/``
+
+Linting:
+
+::
+
+    $ make lint
+
+This runs flake8 on the source code and tests
