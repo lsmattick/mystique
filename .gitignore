@@ -21,6 +21,8 @@ MANIFEST
 # Rust build artifacts
 target/
 Cargo.lock
+*.dylib
+*.dSYM/
 
 # Testing and coverage
 .pytest_cache/
